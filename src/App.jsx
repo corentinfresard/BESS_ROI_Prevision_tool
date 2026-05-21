@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import Papa from 'papaparse';
+import { Analytics } from '@vercel/analytics/react';
 import {
   AreaChart,
   Area,
@@ -2868,6 +2869,7 @@ export default function App() {
             })()}
         </div>
       </div>
+      <Analytics />
     </>
   );
 }
