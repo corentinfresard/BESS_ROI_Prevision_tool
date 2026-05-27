@@ -5,6 +5,7 @@ import {
   ResponsiveContainer, ReferenceLine, BarChart, Bar, Legend,
   LineChart, Line, ComposedChart,
 } from 'recharts';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // ─── PHYSICAL CONSTANTS ───────────────────────────────────────────────────────
 const ETA_CHARGE    = 0.97;
@@ -1719,6 +1720,7 @@ export default function App() {
 
         </div>
       </div>
+      <SpeedInsights />
     </>
   );
 }
