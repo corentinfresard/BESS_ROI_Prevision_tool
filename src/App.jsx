@@ -1538,7 +1538,7 @@ export default function App() {
                   <div className="scard green">
                     <div className="lbl">Batterie optimale</div>
                     <div className="val">{optimal.capKWh.toFixed(0)}<span className="unit">kWh</span></div>
-                    <div className="sub">maximise les économies nettes</div>
+                    <div className="sub">minimise le TRI</div>
                   </div>
                   <div className="scard blue">
                     <div className="lbl">Économies annuelles</div>
