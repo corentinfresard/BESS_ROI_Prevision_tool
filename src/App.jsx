@@ -8,8 +8,8 @@ import {
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // ─── PHYSICAL CONSTANTS ───────────────────────────────────────────────────────
-const ETA_CHARGE    = 0.97;
-const ETA_DISCHARGE = 0.97;
+const ETA_CHARGE    = 0.95;
+const ETA_DISCHARGE = 0.95;
 const C_RATE        = 0.5;   // max (dis)charge rate [1/h]
 const DT            = 0.25;  // 15-min interval [h]
 const OFF_PEAK      = (h) => h < 7 || h >= 22; // night window for proactive charge
@@ -529,8 +529,8 @@ const css = `
   .rcard.hl-blue{background:var(--blue-l);border-color:#bfdbfe;}
   .rcard.hl-amber{background:var(--amber-l);border-color:#fde68a;}
   .rcard.hl-purple{background:var(--purple-l);border-color:#c4b5fd;}
-  .rcard .rl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
-  .rcard .rv{font-family:var(--font-h);font-size:28px;font-weight:800;}
+  .rcard .rl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+  .rcard .rv{font-family:var(--font-h);font-size:30px;font-weight:800;}
   .rcard.hl-green .rv{color:var(--green);} .rcard.hl-blue .rv{color:var(--blue);}
   .rcard.hl-amber .rv{color:var(--amber);} .rcard.hl-purple .rv{color:var(--purple);}
   .rcard .rs{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6;}
@@ -877,20 +877,20 @@ export default function App() {
   const psTabs = [
     { id: 'overview', label: '🏠 Vue d\'ensemble' },
     { id: 'sizing',   label: '⚡ Dimensionnement' },
-    { id: 'roi',      label: '📈 TRI & Économies' },
+    { id: 'roi',      label: '📈 ROI & Économies' },
     { id: 'params',   label: '⚙️ Paramètres' },
   ];
   const acTabs = [
     { id: 'overview', label: '🏠 Vue d\'ensemble' },
     { id: 'ac-detail',label: '☀️ Autoconsommation' },
-    { id: 'roi',      label: '📈 TRI' },
+    { id: 'roi',      label: '📈 ROI' },
     { id: 'params',   label: '⚙️ Paramètres' },
   ];
   const currentTabs = analysisMode === 'autoconso' ? acTabs : psTabs;
 
   // ── Params panel (shared) ─────────────────────────────────────────────────
   const ParamsPanel = () => (
-    <div style={{ maxWidth: 700 }}>
+    <div style={{ maxWidth: 800 }}>
       <div className="card">
         <div style={{ fontFamily:'var(--font-h)', fontWeight:700, fontSize:15, marginBottom:20 }}>Paramètres tarifaires</div>
 
@@ -950,7 +950,7 @@ export default function App() {
 
         {/* Financial params */}
         <div style={{ marginTop:24, padding:16, background:'var(--surface2)', borderRadius:10, border:'1px solid var(--border)' }}>
-          <div style={{ fontSize:12, fontWeight:600, color:'var(--text2)', marginBottom:14 }}>Paramètres financiers (TRI)</div>
+          <div style={{ fontSize:12, fontWeight:600, color:'var(--text2)', marginBottom:14 }}>Paramètres financiers (ROI)</div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
             {[
               { label:'Inflation annuelle', val:inflation, set:setInflation, unit:'%/an' },
@@ -975,9 +975,6 @@ export default function App() {
             C-Rate : <strong style={{ color:'var(--text)' }}>{C_RATE}</strong> &nbsp;·&nbsp;
             η charge : <strong style={{ color:'var(--text)' }}>{ETA_CHARGE * 100}%</strong> &nbsp;·&nbsp;
             η décharge : <strong style={{ color:'var(--text)' }}>{ETA_DISCHARGE * 100}%</strong>
-          </div>
-          <div style={{ fontSize:11, color:'var(--muted)', marginTop:8 }}>
-            <strong>Facturation puissance :</strong> Σ(pic mensuel) × CHF/kW — méthode suisse correcte.
           </div>
         </div>
       </div>
@@ -1018,19 +1015,15 @@ export default function App() {
           <div className="rcard hl-green">
             <div className="rl">Économies nettes annuelles</div>
             <div className="rv">{fmt(currentSavings)} CHF</div>
-            <div className="rs">
-              {isPS ? `Puissance : ${fmt(psScenario?.savPui ?? psScenario?.savingsPuissance)} CHF · Énergie : ${fmt(psScenario?.savEn ?? psScenario?.savingsEnergy)} CHF`
-                    : `Énergie : ${fmt(acScenario?.savEn)} CHF · Puissance : ${fmt(acScenario?.savPui)} CHF`}
-            </div>
           </div>
           <div className={`rcard ${currentRoi ? (currentRoi < 10 ? 'hl-green' : 'hl-amber') : ''}`}>
-            <div className="rl">TRI (avec inflation {inflation}%)</div>
+            <div className="rl">ROI (avec inflation {inflation}%)</div>
             <div className="rv">{currentRoi != null ? `${currentRoi.toFixed(1)} ans` : currentPrix > 0 ? '> 40 ans' : '—'}</div>
             <div className="rs" style={{ marginTop:4 }}>
               ROI : <strong>{currentKwh > 0 && currentPrix > 0 && currentSavings > 0 ? `${computeRoiPct(currentPrix, currentSavings)}%` : '—'}</strong>
-              <span style={{ color:'var(--muted)', fontWeight:400 }}> (économies / investissement)</span>
+              <span style={{ color:'var(--muted)', fontWeight:400 }}> </span>
             </div>
-            <div className="rs">Investissement : {fmt(currentPrix)} CHF · {currentKwh?.toFixed(0)} kWh</div>
+            <div className="rs">Investissement : {fmt(currentPrix)} CHF</div>
             {currentRoi && (
               <div className="roi-track">
                 <div className="roi-fill" style={{ width:`${Math.min(100,(currentRoi/15)*100)}%`, background:currentRoi<8?'var(--green)':'var(--amber)' }}/>
@@ -1038,9 +1031,9 @@ export default function App() {
             )}
           </div>
           <div className="rcard hl-blue">
-            <div className="rl">{isPS ? 'Taux optimal (TRI min.)' : 'Capacité optimale (TRI min.)'}</div>
+            <div className="rl">{isPS ? 'Taux optimal (ROI min.)' : 'Capacité optimale (ROI min.)'}</div>
             <div className="rv">{optROIPoint ? (isPS ? `${optROIPoint.rate}%` : `${optROIPoint.kwh?.toFixed(0)} kWh`) : '—'}</div>
-            <div className="rs">{optROIPoint ? `TRI ${optROIPoint.roi?.toFixed(1)} ans · ROI ${computeRoiPct(optROIPoint.prix, optROIPoint.savings) ?? '—'}% · ${fmt(optROIPoint.prix)} CHF` : '—'}</div>
+            
           </div>
         </div>
 
@@ -1054,7 +1047,8 @@ export default function App() {
                   <CartesianGrid stroke="#e8eef5" strokeDasharray="3 3"/>
                   <XAxis dataKey={isPS ? 'rate' : 'kwh'} stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }}
                     label={{ value: isPS ? 'Taux (%)' : 'Batterie (kWh)', position:'insideBottom', offset:-10, fill:'#7a90a8', fontSize:11 }}/>
-                  <YAxis stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }} tickFormatter={v => `${Math.round(v/1000)}k`}/>
+                  <YAxis stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }} tickFormatter={v => `${Math.round(v/1000)}k`}
+                  label={{ value: isPS ? 'Taux (%)' : 'Prix (CHF)', position:'insideLeft',angle : 270, offset:10, fill:'#7a90a8', fontSize:11 }}/>
                   <Tooltip content={<ChartTip unit="CHF/an"/>}/>
                   <Area type="monotone" dataKey="savings" name="Économies nettes" stroke="#0d9f6e" strokeWidth={2} fill="#0d9f6e18" dot={false}/>
                 </AreaChart>
@@ -1062,17 +1056,17 @@ export default function App() {
             </div>
           </div>
           <div className="sec">
-            <div className="sec-title"><span className="dot" style={{ background:'var(--amber)' }}/>TRI par {isPS ? 'taux' : 'taille de batterie'}</div>
+            <div className="sec-title"><span className="dot" style={{ background:'var(--amber)' }}/>ROI par {isPS ? 'taux' : 'taille de batterie'}</div>
             <div className="card">
               <ResponsiveContainer width="100%" height={230}>
                 <LineChart data={validRoi} margin={{ top:10, right:20, left:10, bottom:20 }}>
                   <CartesianGrid stroke="#e8eef5" strokeDasharray="3 3"/>
                   <XAxis dataKey={isPS ? 'rate' : 'kwh'} stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }}
                     label={{ value: isPS ? 'Taux (%)' : 'Batterie (kWh)', position:'insideBottom', offset:-10, fill:'#7a90a8', fontSize:11 }}/>
-                  <YAxis stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }} label={{ value:'TRI (ans)', angle:-90, position:'insideLeft', fill:'#7a90a8', fontSize:11 }}/>
+                  <YAxis stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }} label={{ value:'ROI (ans)', angle:-90, position:'insideLeft', fill:'#7a90a8', fontSize:11 }}/>
                   <Tooltip content={<ChartTip unit="ans"/>}/>
-                  <ReferenceLine y={10} stroke="#d97706" strokeDasharray="4 3" label={{ value:'TRI 10 ans', fill:'#d97706', fontSize:10, position:'insideTopRight' }}/>
-                  <Line type="monotone" dataKey="roi" name="TRI (ans)" stroke="#d97706" strokeWidth={2.5} dot={false}/>
+                  <ReferenceLine y={10} stroke="#d97706" strokeDasharray="4 3" label={{ value:'ROI 10 ans', fill:'#d97706', fontSize:10, position:'insideTopRight' }}/>
+                  <Line type="monotone" dataKey="roi" name="ROI (ans)" stroke="#d97706" strokeWidth={2.5} dot={false}/>
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -1288,9 +1282,9 @@ export default function App() {
                 {/* Top KPIs */}
                 <div className="stats">
                   <div className="scard green">
-                    <div className="lbl">Batterie optimale (TRI min.)</div>
+                    <div className="lbl">Batterie optimale (ROI min.)</div>
                     <div className="val">{psOptimal?.batterySizeKWh?.toFixed(0) ?? '—'}<span className="unit">kWh</span></div>
-                    <div className="sub">taux {psOptimal?.rate}% · TRI {psOptimal?.roi?.toFixed(1)} ans · ROI {psOptimal ? computeRoiPct(psOptimal.prix, psOptimal.annualSavings) : '—'}%</div>
+                    <div className="sub">taux {psOptimal?.rate}% · ROI {psOptimal?.roi?.toFixed(1)} ans</div>
                   </div>
                   <div className="scard blue">
                     <div className="lbl">Économies annuelles optimales</div>
@@ -1298,7 +1292,7 @@ export default function App() {
                     <div className="sub">puissance + énergie</div>
                   </div>
                   <div className={`scard ${psOptimal?.roi && psOptimal.roi < 10 ? 'green' : 'amber'}`}>
-                    <div className="lbl">TRI optimal</div>
+                    <div className="lbl">ROI optimal</div>
                     <div className="val">{psOptimal?.roi?.toFixed(1) ?? '—'}<span className="unit">ans</span></div>
                     <div className="sub">{fmt(psOptimal ? getPrice(psOptimal.batterySizeKWh) : 0)} CHF investissement</div>
                   </div>
@@ -1318,7 +1312,7 @@ export default function App() {
 
                 {/* Mini ROI preview */}
                 <div className="sec">
-                  <div className="sec-title"><span className="dot" style={{ background:'var(--amber)' }}/>TRI par taux de peak shaving</div>
+                  <div className="sec-title"><span className="dot" style={{ background:'var(--amber)' }}/>ROI par taux de peak shaving</div>
                   <div className="card">
                     <ResponsiveContainer width="100%" height={200}>
                       <LineChart data={psRoiCurve.filter(d => d.roi !== null && d.roi < 30)} margin={{ top:5, right:20, left:10, bottom:16 }}>
@@ -1326,16 +1320,16 @@ export default function App() {
                         <XAxis dataKey="rate" stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }}
                           label={{ value:'Taux (%)', position:'insideBottom', offset:-8, fill:'#7a90a8', fontSize:11 }}/>
                         <YAxis stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }}
-                          label={{ value:'TRI (ans)', angle:-90, position:'insideLeft', fill:'#7a90a8', fontSize:11 }}/>
+                          label={{ value:'ROI (ans)', angle:-90, position:'insideLeft', fill:'#7a90a8', fontSize:11 }}/>
                         <Tooltip content={<ChartTip unit="ans"/>}/>
-                        <ReferenceLine y={10} stroke="#d97706" strokeDasharray="4 3" label={{ value:'TRI 10 ans', fill:'#d97706', fontSize:10, position:'insideTopRight' }}/>
+                        <ReferenceLine y={10} stroke="#d97706" strokeDasharray="4 3" label={{ value:'ROI 10 ans', fill:'#d97706', fontSize:10, position:'insideTopRight' }}/>
                         {psOptimal && <ReferenceLine x={psOptimal.rate} stroke="#0d9f6e" strokeDasharray="4 3"
                           label={{ value:`★ ${psOptimal.rate}%`, fill:'#0d9f6e', fontSize:10, position:'insideTopLeft' }}/>}
-                        <Line type="monotone" dataKey="roi" name="TRI (ans)" stroke="#d97706" strokeWidth={2.5} dot={false}/>
+                        <Line type="monotone" dataKey="roi" name="ROI (ans)" stroke="#d97706" strokeWidth={2.5} dot={false}/>
                       </LineChart>
                     </ResponsiveContainer>
                     <div style={{ textAlign:'center', marginTop:8, fontSize:11, color:'var(--muted)' }}>
-                      ★ = taux optimal ({psOptimal?.rate}%, TRI {psOptimal?.roi?.toFixed(1)} ans · ROI {psOptimal ? computeRoiPct(psOptimal.prix, psOptimal.annualSavings) : '—'}%) · Explorez ⚡ Dimensionnement pour ajuster
+                      ★ = taux optimal ({psOptimal?.rate}%, ROI {psOptimal?.roi?.toFixed(1)} ans · ROI {psOptimal ? computeRoiPct(psOptimal.prix, psOptimal.annualSavings) : '—'}%) · Explorez ⚡ Dimensionnement pour ajuster
                     </div>
                   </div>
                 </div>
@@ -1443,7 +1437,7 @@ export default function App() {
                     </div>
                     <div style={{ display:'flex', flexDirection:'column', justifyContent:'center' }}>
                       <div style={{ fontSize:12, color:'var(--muted)', lineHeight:2.1 }}>
-                        TRI : <strong style={{ color: psScenario?.roi ? (psScenario.roi < 10 ? 'var(--green)' : 'var(--amber)') : 'var(--muted)' }}>
+                        ROI : <strong style={{ color: psScenario?.roi ? (psScenario.roi < 10 ? 'var(--green)' : 'var(--amber)') : 'var(--muted)' }}>
                           {psScenario?.roi ? `${psScenario.roi.toFixed(1)} ans` : psScenario?.prix > 0 ? '> 40 ans' : '—'}
                         </strong><br/>
                         ROI : <strong style={{ color:'var(--green)' }}>
@@ -1539,7 +1533,7 @@ export default function App() {
                   <div className="scard green">
                     <div className="lbl">Batterie optimale</div>
                     <div className="val">{optimal.capKWh.toFixed(0)}<span className="unit">kWh</span></div>
-                    <div className="sub">minimise le TRI</div>
+                    <div className="sub">minimise le temps de ROI</div>
                   </div>
                   <div className="scard blue">
                     <div className="lbl">Économies annuelles</div>
@@ -1547,14 +1541,14 @@ export default function App() {
                     <div className="sub">énergie + puissance incidentale</div>
                   </div>
                   <div className={`scard ${acScenario?.roi && acScenario.roi < 10 ? 'green' : 'amber'}`}>
-                    <div className="lbl">TRI optimal</div>
+                    <div className="lbl">ROI optimal</div>
                     <div className="val">{acScenario?.roi != null ? `${acScenario.roi.toFixed(1)}` : '—'}<span className="unit">ans</span></div>
                     <div className="sub">{fmt(getPrice(optimal?.capKWh ?? 0))} CHF · ROI {optimal ? computeRoiPct(getPrice(optimal.capKWh), optimal.annualSavings) : '—'}%</div>
                   </div>
                   <div className="scard purple">
                     <div className="lbl">Autoconsommation avec batterie</div>
                     <div className="val">{withSelfCons}<span className="unit">%</span></div>
-                    <div className="sub">+{((acScenario?.selfConsRate ?? 0) - acBase.selfConsRate > 0 ? ((acScenario?.selfConsRate ?? 0) - acBase.selfConsRate)*100 : 0).toFixed(1)} pp vs sans batterie</div>
+                    <div className="sub">+{((acScenario?.selfConsRate ?? 0) - acBase.selfConsRate > 0 ? ((acScenario?.selfConsRate ?? 0) - acBase.selfConsRate)*100 : 0).toFixed(1)} % vs sans batterie</div>
                   </div>
                 </div>
 
@@ -1573,7 +1567,8 @@ export default function App() {
                         <CartesianGrid stroke="#e8eef5" strokeDasharray="3 3"/>
                         <XAxis dataKey="capKWh" stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }}
                           label={{ value:'Capacité batterie (kWh)', position:'insideBottom', offset:-10, fill:'#7a90a8', fontSize:11 }}/>
-                        <YAxis yAxisId="left"  stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }} tickFormatter={v => `${Math.round(v/1000)}k`}/>
+                        <YAxis yAxisId="left"  stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }} tickFormatter={v => `${Math.round(v/1000)}k`}
+                        label={{ value:'Prix(CHF)', position:'insideLeft',offset:10, angle : 270,  fill:'#7a90a8', fontSize:11 }}/>
                         <YAxis yAxisId="right" orientation="right" stroke="#c8d4e3" tickLine={false} tick={{ fontSize:11, fill:'#7a90a8' }}
                           domain={[0, 100]} label={{ value:'%', angle:90, position:'insideRight', fill:'#7a90a8', fontSize:11 }}/>
                         <Tooltip content={({ active, payload, label }) => {
@@ -1617,7 +1612,7 @@ export default function App() {
                   </div>
                   <div className="scard teal">
                     <div className="lbl">Gain autoconsommation</div>
-                    <div className="val">+{Math.max(0, ((acScenario?.selfConsRate ?? 0) - acBase.selfConsRate)*100).toFixed(1)}<span className="unit">pp</span></div>
+                    <div className="val">+{Math.max(0, ((acScenario?.selfConsRate ?? 0) - acBase.selfConsRate)*100).toFixed(1)}<span className="unit">%</span></div>
                     <div className="sub">vs PV sans batterie</div>
                   </div>
                 </div>
@@ -1646,7 +1641,7 @@ export default function App() {
                       </button>
                     </div>
                     <div style={{ fontSize:12, color:'var(--muted)', lineHeight:2 }}>
-                      TRI : <strong style={{ color: acScenario?.roi ? (acScenario.roi < 10 ? 'var(--green)' : 'var(--amber)') : 'var(--muted)' }}>
+                      ROI : <strong style={{ color: acScenario?.roi ? (acScenario.roi < 10 ? 'var(--green)' : 'var(--amber)') : 'var(--muted)' }}>
                         {acScenario?.roi != null ? `${acScenario.roi.toFixed(1)} ans` : '—'}
                       </strong><br/>
                       ROI : <strong style={{ color:'var(--green)' }}>
