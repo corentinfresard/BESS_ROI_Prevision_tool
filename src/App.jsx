@@ -848,8 +848,9 @@ export default function App() {
   // ── AC scenario ──────────────────────────────────────────────────────────
   const acScenario = useMemo(() => {
     if (!data || !acCurve || selectedAcCap === null) return null;
-    const pt = acCurve.points.find(p => Math.abs(p.capKWh - selectedAcCap) < 1)
-             ?? acOptimal ?? acCurve.points[0];
+    const pt = acCurve.points.reduce((best, p) =>
+      Math.abs(p.capKWh - selectedAcCap) < Math.abs(best.capKWh - selectedAcCap) ? p : best
+    , acCurve.points[0]);
     if (!pt) return null;
     const sim  = runSim(data, 99999, pt.capKWh, 'autoconso', hpHc);
     const prix = getPrice(pt.capKWh);
