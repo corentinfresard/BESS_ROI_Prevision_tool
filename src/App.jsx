@@ -246,10 +246,25 @@ function runSim(data, thresholdKW, capKWh, emsMode, hpHc) {
           const ch      = Math.max(0, wantKW);
           soc          += ch * DT * ETA_CHARGE;
           gridKW        = Math.max(0, netKW) + ch;
+          selfConsDirect += Math.min(r.pv, r.conso);
+        } else if (netKW > 0) {
+          // Discharge to cover demand below threshold — reduces all monthly peaks
+          // but preserve SoC needed for upcoming peaks above threshold
+          const upcoming   = lookAheadPeak[i];
+          const gap        = Math.max(0, upcoming - thresholdKW);
+          const neededSoC  = Math.min(capKWh, (gap * DT / ETA_DISCHARGE) * 1.2);
+          const spareSoC   = Math.max(0, soc - neededSoC);
+          const maxDisFromSpare = spareSoC / DT / ETA_DISCHARGE;
+          const maxDis  = Math.min(maxDisFromSpare, capKWh * C_RATE);
+          const dis     = Math.min(netKW, maxDis);
+          soc          -= dis * DT * ETA_DISCHARGE;
+          gridKW        = netKW - dis;
+          selfConsDirect += Math.min(r.pv, r.conso);
+          selfConsBatt   += dis * DT;
         } else {
-          gridKW = Math.max(0, netKW);
+          gridKW = 0;
+          selfConsDirect += Math.min(r.pv, r.conso);
         }
-        selfConsDirect += Math.min(r.pv, r.conso);
       }
     }
 
